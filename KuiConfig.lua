@@ -163,6 +163,11 @@ function config_meta:GetActiveProfile()
     return self.profile
 end
 
+--[[
+-- add config changed listener:
+-- arg1 = table / function
+-- arg2 = key of function in table arg1
+--]]
 function config_meta:RegisterConfigChanged(arg1,arg2)
     if not self.listeners then
         self.listeners = {}
@@ -177,6 +182,9 @@ function config_meta:RegisterConfigChanged(arg1,arg2)
     end
 end
 
+--[[
+-- initialise saved variables, return KuiConfig table
+--]]
 function kc:Initialise(var_prefix,defaults)
     local config_tbl = {}
     setmetatable(config_tbl, config_meta)
