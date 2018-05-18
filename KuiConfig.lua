@@ -66,7 +66,10 @@ function config_meta:GetConfig()
     return local_config
 end
 
-function config_meta:SetConfig(k,v)
+--[[
+-- set config key [k] to value [v]
+--]]
+function config_meta:SetKey(k,v)
     if not self.profile then return end
     self.profile[k] = v
 
@@ -76,6 +79,21 @@ function config_meta:SetConfig(k,v)
 
     -- dispatch to configChanged listeners
     CallListeners(self,k,v)
+end
+
+--[[
+-- reset config key [k]
+-- alias of config_tbl:SetKey(k,nil)
+--]]
+function config_meta:ResetKey(k)
+    self:SetKey(k,nil)
+end
+
+--[[
+-- legacy alias for config_tbl:SetKey
+--]]
+function config_meta:SetConfig(...)
+    self:SetKey(...)
 end
 
 --[[
