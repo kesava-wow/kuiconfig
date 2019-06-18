@@ -3,7 +3,7 @@
 -- By Kesava @ curse.com.
 -- All rights reserved.
 --]]
-local MAJOR, MINOR = 'KuiConfig-1.0', 6
+local MAJOR, MINOR = 'KuiConfig-1.0', 7
 local kc = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not kc then
