@@ -93,13 +93,7 @@ end
 function config_meta:SetKey(k,v)
     if not self.profile then return end
     self.profile[k] = v
-
-    -- post complete profile to saved variable
-    -- TODO set to other profiles maybe?
-    _G[self.gsv_name].profiles[self.csv.profile] = self.profile
-
-    -- dispatch to configChanged listeners
-    CallListeners(self,k,v)
+    self:PostProfile()
 end
 
 --[[
@@ -168,11 +162,8 @@ end
 --]]
 function config_meta:CopyProfile(profile_name,new_name)
     if not profile_name or not new_name or new_name == '' then return end
-
-    _G[self.gsv_name].profiles[new_name] = self:GetProfile(profile_name)
-    self.gsv.profiles[new_name] = _G[self.gsv_name].profiles[new_name]
-
-    self:SetProfile(new_name)
+    self.csv.profile = new_name
+    self:PostProfile(new_name,self:GetProfile(profile_name))
 end
 
 --[[
@@ -193,11 +184,7 @@ end
 --]]
 function config_meta:ResetProfile(profile_name)
     if not profile_name then return end
-
-    _G[self.gsv_name].profiles[profile_name] = nil
-    self.gsv.profiles[profile_name] = nil
-
-    self:SetProfile(profile_name)
+    self:PostProfile(profile_name,{})
 end
 
 --[[
