@@ -20,7 +20,7 @@ end
 --]]
 local function CallListeners(tbl,k,v)
     if type(tbl.listeners) == 'table' then
-        for i,listener_tbl in ipairs(tbl.listeners) do
+        for _,listener_tbl in ipairs(tbl.listeners) do
             local listener,func = unpack(listener_tbl)
 
             if  listener and
