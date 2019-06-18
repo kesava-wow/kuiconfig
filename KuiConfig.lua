@@ -40,6 +40,27 @@ local config_meta = {}
 config_meta.__index = config_meta
 
 --[[
+-- post the named profile to the saved variable
+-- falls back to currently active profile
+-- if p_table is a table, overwrite profile with p_table
+-- will create named profile if it does not exist
+-- also updates if the currently active profile is modified
+--]]
+function config_meta:PostProfile(p_name,p_table)
+    if not p_name then p_name = self.csv.profile end
+    if not p_table then p_table = self.profile end
+    assert(p_name and p_table)
+
+    _G[self.gsv_name].profiles[p_name] = p_table
+
+    if p_name == self.csv.profile then
+        -- if this is the active profile,
+        -- we also need to update the profile locals and call listeners
+        self:SetProfile(p_name)
+    end
+end
+
+--[[
 -- merges current active profile (self.profile) with given defaults and returns
 -- the resulting config table
 --]]
