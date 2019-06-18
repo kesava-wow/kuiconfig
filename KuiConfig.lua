@@ -88,7 +88,7 @@ function config_meta:GetConfig()
 end
 
 --[[
--- set config key [k] to value [v]
+-- set config key [k] to value [v] and update
 --]]
 function config_meta:SetKey(k,v)
     if not self.profile then return end
@@ -118,17 +118,24 @@ function config_meta:SetConfig(...)
 end
 
 --[[
--- set active profile to given name
--- will create a profile if given doesn't exist
+-- set active profile to given named profile
 --]]
 function config_meta:SetProfile(profile_name)
+    -- get/create named profile
+    self.profile = self:GetProfile(profile_name)
+
+    -- set character's profile
     _G[self.csv_name].profile = profile_name
     self.csv = _G[self.csv_name]
-    self.profile = self:GetProfile(profile_name)
 
     CallListeners(self)
 end
 
+--[[
+-- return profile table for given profile
+-- falls back to "default"
+-- creates profile if it doesn't exist
+--]]
 function config_meta:GetProfile(profile_name)
     if not profile_name then
         profile_name = 'default'
@@ -157,7 +164,7 @@ function config_meta:DeleteProfile(profile_name,no_set)
 end
 
 --[[
--- copy named profile to given name
+-- copy named profile to given name and switch to it
 --]]
 function config_meta:CopyProfile(profile_name,new_name)
     if not profile_name or not new_name or new_name == '' then return end
@@ -182,7 +189,7 @@ function config_meta:RenameProfile(profile_name,new_name)
 end
 
 --[[
--- reset named profile to defaults (by deleting and recreating it)
+-- reset named profile to defaults (by setting it to an empty table)
 --]]
 function config_meta:ResetProfile(profile_name)
     if not profile_name then return end
@@ -195,7 +202,7 @@ end
 
 --[[
 -- alias for GetProfile(active_profile_name)
--- sets config_meta.profile to active profile
+-- sets config_meta.profile to active profile and returns it
 --]]
 function config_meta:GetActiveProfile()
     self.profile = self:GetProfile(self.csv.profile)
