@@ -40,7 +40,7 @@ local config_meta = {}
 config_meta.__index = config_meta
 
 function config_meta:ProfileExists(name)
-    return type(self.gsv.profiles[name]) == 'table'
+    return type(self:GSV().profiles[name]) == 'table'
 end
 
 --[[
@@ -49,17 +49,10 @@ end
 -- if p_table is a table, overwrite profile with p_table
 --]]
 function config_meta:PostProfile(p_name,p_table)
-    if not p_name then p_name = self.csv.profile end
+    if not p_name then p_name = self:CSV().profile end
     if not p_table then p_table = self.profile end
     assert(p_name and p_table)
-    _G[self.gsv_name].profiles[p_name] = p_table
-end
-
---[[
--- post the local copy of the character's saved variable to the global
-]]
-function config_meta:PostCharacter()
-    _G[self.csv_name] = self.csv
+    self:GSV().profiles[p_name] = p_table
 end
 
 --[[
@@ -130,8 +123,7 @@ function config_meta:SetProfile(profile_name)
     self.profile = self:GetProfile(profile_name)
 
     -- remember profile for this character
-    self.csv.profile = profile_name
-    self:PostCharacter()
+    self:CSV().profile = profile_name
 
     -- inform listeners of profile change / run callbacks
     CallListeners(self)
@@ -148,10 +140,10 @@ function config_meta:GetProfile(profile_name)
     end
 
     if not self:ProfileExists(profile_name) then
-        self.gsv.profiles[profile_name] = {}
+        self:GSV().profiles[profile_name] = {}
     end
 
-    return self.gsv.profiles[profile_name]
+    return self:GSV().profiles[profile_name]
 end
 
 --[[
@@ -161,8 +153,7 @@ end
 function config_meta:DeleteProfile(profile_name,no_set)
     if not profile_name then return end
 
-    _G[self.gsv_name].profiles[profile_name] = nil
-    self.gsv.profiles[profile_name] = nil
+    self:GSV().profiles[profile_name] = nil
 
     if not no_set then
         self:SetProfile('default')
@@ -205,7 +196,7 @@ end
 -- sets config_meta.profile to active profile and returns it
 --]]
 function config_meta:GetActiveProfile()
-    self.profile = self:GetProfile(self.csv.profile)
+    self.profile = self:GetProfile(self:CSV().profile)
     return self.profile
 end
 
@@ -228,6 +219,9 @@ function config_meta:RegisterConfigChanged(arg1,arg2)
     end
 end
 
+function config_meta:GSV() return _G[self.gsv_name] end
+function config_meta:CSV() return _G[self.csv_name] end
+
 --[[
 -- initialise saved variables, return KuiConfig table
 --]]
@@ -236,26 +230,23 @@ function kc:Initialise(var_prefix,defaults)
     setmetatable(config_tbl, config_meta)
     config_tbl.defaults = defaults
 
-    local g_name, c_name = var_prefix..'Saved', var_prefix..'CharacterSaved'
+    local gsv_name = var_prefix..'Saved'
+    if not _G[gsv_name] then _G[gsv_name] = {} end
+    config_tbl.gsv_name = gsv_name
+    
+    local csv_name = var_prefix..'CharacterSaved'
+    if not _G[csv_name] then _G[csv_name] = {} end
+    config_tbl.csv_name = csv_name
 
-    if not _G[g_name] then _G[g_name] = {} end
-    if not _G[c_name] then _G[c_name] = {} end
-
-    local gsv, csv = _G[g_name], _G[c_name]
-
+    local gsv = config_tbl:GSV()
     if not gsv.profiles then
         gsv.profiles = {}
     end
 
+    local gsv = config_tbl:CSV()
     if not csv.profile then
         csv.profile = 'default'
     end
-
-    config_tbl.gsv_name = g_name
-    config_tbl.csv_name = c_name
-
-    config_tbl.gsv = gsv
-    config_tbl.csv = csv
 
     config_tbl:GetActiveProfile()
     return config_tbl
