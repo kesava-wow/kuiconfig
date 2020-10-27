@@ -18,7 +18,7 @@ function kc:Initialise(var_prefix,defaults)
     local gsv_name = var_prefix..'Saved'
     if not _G[gsv_name] then _G[gsv_name] = {} end
     config_tbl.gsv_name = gsv_name
-    
+
     local csv_name = var_prefix..'CharacterSaved'
     if not _G[csv_name] then _G[csv_name] = {} end
     config_tbl.csv_name = csv_name
@@ -95,7 +95,6 @@ function config_meta:GetKey(k)
     end
 end
 -- reset config key [k]
--- alias of config_tbl:SetKey(k,nil)
 function config_meta:ResetKey(k)
     self:SetKey(k,nil)
 end
@@ -137,7 +136,7 @@ function config_meta:CopyProfile(profile_name,new_name)
     assert(not self:ProfileExists(new_name))
 
     local profile = self:CreateProfile(new_name)
-    if not profile return end
+    if not profile then return end
 
     Mixin(profile,self:GetProfile(profile_name))
     return true
