@@ -39,22 +39,15 @@ function kc:Initialise(var_prefix,defaults)
 
     return config_tbl
 end
-function kc:print(m)
-    print(MAJOR..'-'..MINOR..': '..(m or 'nil'))
-end
--- call callbacks of listeners for given config table [tbl]
-local function CallListeners(tbl,k,v)
-    if type(tbl.listeners) == 'table' then
-        for _,listener_tbl in ipairs(tbl.listeners) do
-            local listener,func = unpack(listener_tbl)
-
-            if  listener and
-                type(func) == 'string' and
-                type(listener[func]) == 'function'
-            then
-                listener[func](listener,tbl,k,v)
-            elseif type(func) == 'function' then
-                func(tbl,k,v)
+-- call callbacks of listeners for given config table [config]
+local function CallListeners(config,...)
+    if type(config.listeners) == 'table' then
+        for _,listener in ipairs(config.listeners) do
+            if type(listener) == 'function' then
+                listener(config,...)
+            else
+                local parent,key = unpack(listener)
+                parent[key](parent,config,...)
             end
         end
     end
@@ -64,16 +57,14 @@ end
 -- arg1 = table / function
 -- arg2 = key of function in table [arg1]
 function config_meta:RegisterConfigChanged(arg1,arg2)
-    if not self.listeners then
-        self.listeners = {}
-    end
-
-    if type(arg1) == 'table' and type(arg2) == 'string' and arg1[arg2] then
-        tinsert(self.listeners,{arg1,arg2})
-    elseif type(arg1) == 'function' then
-        tinsert(self.listeners,{nil,arg1})
+    if not self.listeners then self.listeners = {} end
+    if type(arg1) == 'function' then
+        tinsert(self.listeners,arg1)
     else
-       kc:print('invalid arguments to RegisterConfigChanged: no function')
+        assert(type(arg1) == 'table')
+        assert(type(arg2) == 'string')
+        assert(type(arg1[arg2]) == 'function')
+        tinsert(self.listeners,{arg1,arg2})
     end
 end
 -- global aliases
